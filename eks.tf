@@ -101,7 +101,7 @@ resource "aws_eks_node_group" "group1" {
     node_group_name = "group1"
     node_role_arn = aws_iam_role.node_group_role.arn
     subnet_ids = ["subnet-0b9025e22d7e25f49", "subnet-06332970fe73ef540", "subnet-083695ab3c126af08"]
-    instance_types = ["t3.micro"]
+    instance_types = ["c7i-flex.large"]
     scaling_config {
         desired_size = 2
         max_size = 3
@@ -120,10 +120,9 @@ resource "aws_eks_node_group" "group1" {
 
 
 
-
 resource "aws_eks_access_entry" "admin" {
   cluster_name  = aws_eks_cluster.cluster1.name
-  principal_arn = "arn:aws:iam::997184852332:role/JENKINS-EKS"
+  principal_arn = data.aws_caller_identity.current.arn
   type          = "STANDARD"
   depends_on = [aws_eks_cluster.cluster1]
 }
@@ -134,7 +133,7 @@ resource "aws_eks_access_entry" "admin" {
 
 resource "aws_eks_access_policy_association" "admin_policy" {
   cluster_name  = aws_eks_cluster.cluster1.name
-  principal_arn = "arn:aws:iam::997184852332:role/JENKINS-EKS"
+  principal_arn = data.aws_caller_identity.current.arn
 
   policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
 
@@ -145,5 +144,6 @@ resource "aws_eks_access_policy_association" "admin_policy" {
 
 
 
-
 data "aws_caller_identity" "current" {}
+
+
