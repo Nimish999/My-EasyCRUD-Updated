@@ -15,7 +15,7 @@ resource "aws_iam_role" "cluster-role" {
         Principal = {
           Service = "eks.amazonaws.com"
         }
-      }
+      },
     ]
   })
 }
@@ -33,7 +33,7 @@ resource "aws_eks_cluster" "cluster1" {
     security_group_ids = ["sg-01be39ca928b458c1"]
   }
   
-  # Changed to API mode for proper node authentication
+  # API mode with automatic admin permissions for creator
   access_config {
     authentication_mode = "API"
     bootstrap_cluster_creator_admin_permissions = true
@@ -116,25 +116,7 @@ resource "aws_eks_access_entry" "node" {
   depends_on = [aws_eks_cluster.cluster1]
 }
 
-# Admin Access Entry
-resource "aws_eks_access_entry" "admin" {
-  cluster_name  = aws_eks_cluster.cluster1.name
-  principal_arn = data.aws_caller_identity.current.arn
-  type          = "STANDARD"
-  
-  depends_on = [aws_eks_cluster.cluster1]
-}
-
-resource "aws_eks_access_policy_association" "admin_policy" {
-  cluster_name  = aws_eks_cluster.cluster1.name
-  principal_arn = data.aws_caller_identity.current.arn
-  policy_arn    = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
-  
-  access_scope {
-    type = "cluster"
-  }
-  
-  depends_on = [aws_eks_access_entry.admin]
-}
+# No need for manual admin access entry - it's created automatically
+# by bootstrap_cluster_creator_admin_permissions = true
 
 data "aws_caller_identity" "current" {}
